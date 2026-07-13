@@ -1,0 +1,742 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage[hidelinks]{hyperref}
+
+\geometry{margin=1in}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\title{A Scaling--Cancellation Principle for Chord-Based Geometric Approximations}
+\author{C. Wayne Baker}
+\date{June 28, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This note separates two geometric error-suppression mechanisms that arise in
+chord-based approximation and angular refinement. The first is
+scaling--cancellation: when fixed-resolution approximants satisfy an
+even-power expansion
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+C_6N^{-6}
++
+\cdots,
+\]
+Richardson-type linear combinations of \(Q_N,Q_{kN},\ldots\) cancel leading
+terms and increase the order of accuracy. This mechanism applies to
+polygonal approximations of \(\pi\), chordal perimeter approximations, and
+geometric N-series acceleration.
+
+The second mechanism is nonlinear residual-map iteration. In the Baker
+\(4{:}3\) trisection cascade, the active variable is not a resolution scale
+but the signed angular error, and the local map satisfies
+\[
+e_{j+1}
+=
+-\frac{7}{384}e_j^3
++
+O(e_j^5).
+\]
+Thus the cascade multiplies error order under iteration, producing
+\[
+3
+\longrightarrow
+9
+\longrightarrow
+27
+\longrightarrow
+81
+\longrightarrow
+\cdots.
+\]
+
+The contribution of the note is therefore taxonomic rather than a claim of
+new Richardson theory. Scaling--cancellation is an order-increasing
+fixed-resolution mechanism; the Baker \(4{:}3\) cascade is an
+order-multiplying nonlinear refinement. Both suppress leading error terms by
+geometrically selected coefficients or scalings, but they act in different
+variables and belong to different convergence classes.
+\end{abstract}
+
+\section{Introduction}
+
+Chord-based geometric approximation appears throughout classical and modern
+geometry. Archimedes' polygonal approximation to \(\pi\), chordal perimeter
+approximations for ellipses, and perimeter approximations for smooth convex
+curves all involve a discretization parameter \(N\). As \(N\) grows, the
+approximation improves, and the leading error often has a predictable
+asymptotic structure.
+
+A recurring form is
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+C_6N^{-6}
++
+\cdots ,
+\]
+where \(Q\) is the target geometric quantity and \(Q_N\) is its
+\(N\)-resolution approximation. The even powers arise from symmetry: local
+odd-order errors cancel, leaving a hierarchy in powers of \(N^{-2}\).
+
+The purpose of this paper is to isolate the elementary but useful
+consequence of this structure. If \(Q_N\) and \(Q_{kN}\) are available, then
+their leading errors differ by the factor \(k^{-2}\). Therefore a specific
+linear combination cancels the leading term. This is the geometric form of a
+Richardson-type acceleration mechanism.
+
+The paper also clarifies what this mechanism is not. It is not a modular
+transformation, and it is not the same mechanism as the Baker \(4{:}3\)
+trisection cascade. The latter is a nonlinear residual-map iteration in the
+signed angular error. Its local law is cubic in the current error, not a
+fixed-resolution cancellation in \(N^{-2}\). The distinction is important:
+scaling--cancellation increases the order of a fixed asymptotic expansion,
+whereas the Baker cascade multiplies the local error order under iteration.
+
+\section{Even-Power Asymptotic Structure}
+
+Let \(Q\) be a geometric quantity associated with a smooth curve, polygonal
+limit, or chord-based construction. Let \(Q_N\) be an approximation obtained
+from \(N\) uniform samples, chords, or subdivisions.
+
+The following assumption records the asymptotic structure used throughout
+the paper.
+
+\begin{assumption}[Even-power chord expansion]
+The approximation \(Q_N\) admits an asymptotic expansion of the form
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+C_6N^{-6}
++
+O(N^{-8}),
+\]
+where the constants \(C_{2j}\) depend on the underlying geometry but not on
+\(N\).
+\end{assumption}
+
+This assumption is natural for symmetric chord-based approximations. For
+example, if a smooth curve is sampled at uniform parameter spacing
+\(h=1/N\), then Taylor expansion of the local chord contribution produces
+powers of \(h\). Symmetry under reversal of the local interval cancels the
+odd-order contributions, leaving even powers of \(h\), equivalently even
+powers of \(N^{-1}\).
+
+\begin{remark}
+The paper does not require a universal proof that every chord-based
+approximation has such an expansion. The scaling--cancellation theorem is
+conditional on the displayed expansion. In applications, the expansion may
+be proved by Taylor expansion, Euler--Maclaurin analysis, or standard
+perimeter approximation estimates.
+\end{remark}
+
+\section{The Scaling Law}
+
+The even-power expansion immediately gives a scaling law.
+
+\begin{proposition}[Scaling of the leading errors]
+Assume
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+C_6N^{-6}
++
+O(N^{-8}).
+\]
+For a fixed integer \(k\geq2\),
+\[
+Q-Q_{kN}
+=
+\frac{C_2}{k^2}N^{-2}
++
+\frac{C_4}{k^4}N^{-4}
++
+\frac{C_6}{k^6}N^{-6}
++
+O(N^{-8}).
+\]
+\end{proposition}
+
+\begin{proof}
+Substitute \(kN\) for \(N\) in the asymptotic expansion:
+\[
+Q-Q_{kN}
+=
+C_2(kN)^{-2}
++
+C_4(kN)^{-4}
++
+C_6(kN)^{-6}
++
+O((kN)^{-8}).
+\]
+Since \(k\) is fixed, this becomes
+\[
+Q-Q_{kN}
+=
+\frac{C_2}{k^2}N^{-2}
++
+\frac{C_4}{k^4}N^{-4}
++
+\frac{C_6}{k^6}N^{-6}
++
+O(N^{-8}).
+\]
+\end{proof}
+
+Thus the leading error coefficient is transformed by the predictable factor
+\(k^{-2}\). This is the source of the cancellation formula.
+
+\section{The Scaling--Cancellation Principle}
+
+\begin{theorem}[Scaling--cancellation principle]
+Suppose
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+O(N^{-6}).
+\]
+For fixed \(k\geq2\), define
+\[
+\widehat Q_{N,k}
+=
+Q_{kN}
++
+\frac{Q_{kN}-Q_N}{k^2-1}.
+\]
+Equivalently,
+\[
+\widehat Q_{N,k}
+=
+\frac{k^2Q_{kN}-Q_N}{k^2-1}.
+\]
+Then
+\[
+Q-\widehat Q_{N,k}
+=
+O(N^{-4}).
+\]
+More precisely,
+\[
+Q-\widehat Q_{N,k}
+=
+-\frac{C_4}{k^2}N^{-4}
++
+O(N^{-6}).
+\]
+\end{theorem}
+
+\begin{proof}
+From the expansion,
+\[
+Q_N
+=
+Q
+-
+C_2N^{-2}
+-
+C_4N^{-4}
++
+O(N^{-6}),
+\]
+and
+\[
+Q_{kN}
+=
+Q
+-
+\frac{C_2}{k^2}N^{-2}
+-
+\frac{C_4}{k^4}N^{-4}
++
+O(N^{-6}).
+\]
+Using
+\[
+\widehat Q_{N,k}
+=
+\frac{k^2Q_{kN}-Q_N}{k^2-1},
+\]
+we compute
+\[
+\widehat Q_{N,k}-Q
+=
+\frac{
+k^2(Q_{kN}-Q)-(Q_N-Q)
+}{
+k^2-1
+}.
+\]
+Now
+\[
+k^2(Q_{kN}-Q)
+=
+-C_2N^{-2}
+-
+\frac{C_4}{k^2}N^{-4}
++
+O(N^{-6}),
+\]
+while
+\[
+Q_N-Q
+=
+-C_2N^{-2}
+-
+C_4N^{-4}
++
+O(N^{-6}).
+\]
+Subtracting gives
+\[
+k^2(Q_{kN}-Q)-(Q_N-Q)
+=
+C_4\left(1-\frac{1}{k^2}\right)N^{-4}
++
+O(N^{-6}).
+\]
+Dividing by \(k^2-1\),
+\[
+\widehat Q_{N,k}-Q
+=
+\frac{C_4}{k^2}N^{-4}
++
+O(N^{-6}).
+\]
+Therefore
+\[
+Q-\widehat Q_{N,k}
+=
+-\frac{C_4}{k^2}N^{-4}
++
+O(N^{-6}),
+\]
+as claimed.
+\end{proof}
+
+\begin{remark}
+The combination
+\[
+\widehat Q_{N,k}
+=
+Q_{kN}
++
+\frac{Q_{kN}-Q_N}{k^2-1}
+\]
+uses only the two approximations \(Q_N\) and \(Q_{kN}\). It does not require
+knowledge of \(C_2\). The coefficient \(C_2\) is eliminated because its
+scaling factor \(k^{-2}\) is known.
+\end{remark}
+
+\section{Higher-Order Fixed-Scale Cancellation}
+
+The same idea extends to more than two scales. Suppose the full even-power
+expansion has the form
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+C_6N^{-6}
++
+\cdots .
+\]
+
+Choose distinct fixed scale factors
+\[
+k_0,k_1,\ldots,k_s,
+\qquad
+k_j>0,
+\]
+and form a linear combination
+\[
+\widehat Q_N^{(s)}
+=
+\sum_{j=0}^{s}w_jQ_{k_jN}.
+\]
+
+To preserve the limiting value \(Q\), the weights must satisfy
+\[
+\sum_{j=0}^{s}w_j=1.
+\]
+To cancel the first \(s\) even-power error terms, require
+\[
+\sum_{j=0}^{s}w_jk_j^{-2\ell}=0,
+\qquad
+\ell=1,2,\ldots,s.
+\]
+
+\begin{theorem}[Higher-order fixed-scale cancellation]
+Assume
+\[
+Q-Q_N
+=
+\sum_{\ell=1}^{s+1}C_{2\ell}N^{-2\ell}
++
+O(N^{-2s-4}).
+\]
+Let
+\[
+k_0=1,
+\qquad
+k_1,\ldots,k_s
+\]
+be distinct positive scale factors, and define
+\[
+\widehat Q_N^{(s)}
+=
+\sum_{j=0}^{s}w_jQ_{k_jN}.
+\]
+Suppose the weights satisfy
+\[
+\sum_{j=0}^{s}w_j=1
+\]
+and
+\[
+\sum_{j=0}^{s}w_jk_j^{-2\ell}=0,
+\qquad
+\ell=1,2,\ldots,s.
+\]
+Then
+\[
+Q-\widehat Q_N^{(s)}
+=
+O(N^{-2s-2}).
+\]
+
+For distinct values
+\[
+k_0^{-2},k_1^{-2},\ldots,k_s^{-2},
+\]
+these conditions form a nonsingular Vandermonde system. Hence the weights
+exist and are unique.
+\end{theorem}
+
+\section{Application to Polygonal Approximation of \texorpdfstring{\(\pi\)}{pi}}
+
+For an inscribed regular \(N\)-gon in the unit circle, the perimeter is
+\[
+P_N
+=
+2N\sin\left(\frac{\pi}{N}\right).
+\]
+Using the sine expansion,
+\[
+\sin x
+=
+x-\frac{x^3}{6}+\frac{x^5}{120}+O(x^7),
+\]
+we obtain
+\[
+P_N
+=
+2N
+\left[
+\frac{\pi}{N}
+-
+\frac{\pi^3}{6N^3}
++
+\frac{\pi^5}{120N^5}
++
+O(N^{-7})
+\right].
+\]
+Therefore
+\[
+P_N
+=
+2\pi
+-
+\frac{\pi^3}{3}N^{-2}
++
+\frac{\pi^5}{60}N^{-4}
++
+O(N^{-6}).
+\]
+Thus
+\[
+2\pi-P_N
+=
+\frac{\pi^3}{3}N^{-2}
+-
+\frac{\pi^5}{60}N^{-4}
++
+O(N^{-6}).
+\]
+
+Applying the scaling--cancellation theorem gives
+\[
+\widehat P_{N,k}
+=
+P_{kN}
++
+\frac{P_{kN}-P_N}{k^2-1},
+\]
+with
+\[
+2\pi-\widehat P_{N,k}
+=
+O(N^{-4}).
+\]
+
+For \(k=3\),
+\[
+\widehat P_{N,3}
+=
+P_{3N}
++
+\frac{P_{3N}-P_N}{8}.
+\]
+
+\begin{remark}
+This construction does not prove a new value of \(\pi\). It accelerates a
+known convergent polygonal approximation by cancelling its leading
+asymptotic error term.
+\end{remark}
+
+\section{Application to Smooth Convex-Curve Perimeters}
+
+Let \(\Gamma\) be a smooth closed convex curve with perimeter \(P\), and let
+\(P_N\) be a chordal perimeter approximation using \(N\) equal-parameter
+samples. Under standard smoothness and symmetry assumptions, one obtains an
+even-power expansion
+\[
+P-P_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+O(N^{-6}).
+\]
+
+The scaling--cancellation theorem gives
+\[
+\widehat P_{N,k}
+=
+P_{kN}
++
+\frac{P_{kN}-P_N}{k^2-1},
+\]
+and therefore
+\[
+P-\widehat P_{N,k}
+=
+O(N^{-4}).
+\]
+
+For \(k=3\),
+\[
+\widehat P_{N,3}
+=
+P_{3N}
++
+\frac{P_{3N}-P_N}{8}.
+\]
+
+This is the same structural mechanism used in chordal ellipse-perimeter
+corrections. The method does not depend on the ellipse specifically; the
+ellipse is a particularly important example because its exact perimeter is
+non-elementary and classical approximations such as Ramanujan's formula act
+on a different variable, namely eccentricity.
+
+\section{Comparison with the Baker \texorpdfstring{\(4{:}3\)}{4:3} Trisection Cascade}
+
+The preceding applications are fixed-resolution approximations. Their
+active asymptotic variable is \(N^{-2}\), and the improvement is obtained
+by combining approximants at \(N\), \(kN\), and possibly further fixed
+scales.
+
+The Baker \(4{:}3\) trisection cascade belongs to a different class. There
+the active variable is not a discretization scale but the signed angular
+error
+\[
+e_j
+=
+D_j-\frac{\theta}{3}.
+\]
+For the Baker \(4{:}3\) branch, the local residual map has the form
+\[
+e_{j+1}
+=
+-\frac{7}{384}e_j^3
++
+O(e_j^5).
+\]
+After normalization, this becomes the degree-three normal form
+\[
+\eta_{j+1}
+=
+-\eta_j^3
++
+O(\eta_j^5).
+\]
+
+Thus the trisection cascade is not a direct instance of the
+scaling--cancellation theorem. It is a nonlinear residual-map iteration
+whose local effect is to multiply the current error order by three:
+\[
+3
+\longrightarrow
+9
+\longrightarrow
+27
+\longrightarrow
+81
+\longrightarrow
+\cdots .
+\]
+
+The comparison is nevertheless useful. In both settings, geometry supplies
+a distinguished coefficient, scaling, or correction that suppresses a
+leading error contribution. But the mechanisms are logically distinct:
+
+\begin{itemize}
+\item scaling--cancellation is order-increasing cancellation in a
+fixed-resolution parameter;
+\item the Baker \(4{:}3\) cascade is order-multiplying nonlinear iteration in
+the signed error variable.
+\end{itemize}
+
+This distinction prevents the fixed N-series mechanism from being mistaken
+for a modular transformation or for the Baker cubic residual cascade.
+
+\section{Discussion}
+
+The scaling--cancellation mechanism has three ingredients:
+
+\begin{itemize}
+\item symmetry produces an even-power expansion;
+\item scaling gives predictable transformations of the asymptotic terms;
+\item linear combination cancels the leading error contribution.
+\end{itemize}
+
+This produces systematic order improvement without nonlinear iteration. In
+the simplest case, a pair of approximants \(Q_N\) and \(Q_{kN}\) cancels the
+leading \(N^{-2}\) term and produces fourth-order accuracy. With more fixed
+scales, successive even-power terms may be cancelled.
+
+The mechanism is therefore best described as a Richardson-type geometric
+acceleration. It should be distinguished from super-exponential modular
+iteration, such as the arithmetic--geometric mean, and from nonlinear
+geometric residual cascades, such as the Baker \(4{:}3\) trisection
+construction.
+
+\section{Conclusion}
+
+We have formulated a scaling--cancellation principle governing chord-based
+geometric approximations with even-power asymptotic expansions. If
+\[
+Q-Q_N
+=
+C_2N^{-2}
++
+C_4N^{-4}
++
+O(N^{-6}),
+\]
+then
+\[
+\widehat Q_{N,k}
+=
+Q_{kN}
++
+\frac{Q_{kN}-Q_N}{k^2-1}
+\]
+satisfies
+\[
+Q-\widehat Q_{N,k}
+=
+O(N^{-4}).
+\]
+
+The framework applies directly to polygonal approximations of \(\pi\),
+chordal perimeter approximations for ellipses, and smooth convex-curve
+perimeter approximations. It also clarifies the relationship between
+geometric N-series acceleration and other refinement mechanisms.
+
+The Baker \(4{:}3\) trisection cascade is not a scaling--cancellation
+operator. It is a separate cubic residual-map cascade. Together, these
+examples show two complementary forms of geometric error suppression:
+order-increasing cancellation in a resolution variable and order-multiplying
+iteration in an error variable.
+
+Future work will extend the fixed-resolution scaling--cancellation framework
+to higher-order combinations, nonuniform chord distributions, and broader
+classes of smooth curves.
+
+\begin{thebibliography}{9}
+
+\bibitem{Archimedes}
+Archimedes,
+\emph{Measurement of a Circle}.
+
+\bibitem{Richardson1911}
+L.~F. Richardson,
+``The approximate arithmetical solution by finite differences of physical
+problems involving differential equations, with an application to the
+stresses in a masonry dam,''
+\emph{Philosophical Transactions of the Royal Society of London, Series A},
+210, 1911, pp.~307--357.
+
+\bibitem{TrefethenWeideman2014}
+L.~N. Trefethen and J.~A.~C. Weideman,
+``The exponentially convergent trapezoidal rule,''
+\emph{SIAM Review},
+56(3), 2014, pp.~385--458.
+
+\bibitem{BakerEllipseScaling2026}
+W.~Baker,
+\emph{A Universal Scaling Law for Ellipse Perimeters},
+manuscript, 2026.
+
+\bibitem{BakerCascade2026}
+W.~Baker,
+\emph{A Constructive Cubic Error Cascade for Approximate Angle Trisection},
+manuscript, 2026.
+
+\bibitem{BakerRamanujanLanden2026}
+W.~Baker,
+\emph{Ramanujan, Landen, and Baker N-Series Refinement:
+Higher-Degree Modular Gap Laws and a Two-Axis Comparison},
+manuscript, 2026.
+
+\end{thebibliography}
+
+\end{document}

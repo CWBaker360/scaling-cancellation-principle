@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use or discuss this work, please cite it using the metadata below."
+title: "A Scaling-Cancellation Principle for Chord-Based Geometric Approximations"
+type: article
+authors:
+  - family-names: Baker
+    given-names: C. Wayne
+date-released: 2026-06-28
+version: preprint-v1
+repository-code: "https://github.com/CWBaker360/scaling-cancellation-principle"
+url: "https://github.com/CWBaker360/scaling-cancellation-principle"
+abstract: >-
+  This note formulates a Richardson-type scaling-cancellation principle for
+  chord-based geometric approximations with even-power asymptotic expansions.
+  It proves that a two-scale combination cancels the leading inverse-square
+  error and distinguishes fixed-resolution order improvement from the
+  nonlinear cubic residual map of the Baker 4:3 trisection cascade.
+keywords:
+  - scaling cancellation
+  - Richardson extrapolation
+  - chord approximation
+  - polygonal approximation
+  - asymptotic analysis
+  - geometric N-series
+  - trisection cascade
+license: proprietary
