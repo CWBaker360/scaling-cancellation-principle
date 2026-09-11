@@ -46,6 +46,8 @@
   boundaries distinguishing the geometric organization from classical
   Richardson-Romberg extrapolation theory.
 - Recompiled and independently checked the synchronized nine-page TeX/PDF pair.
+- Published the revised preprint and source archive on Zenodo with DOI
+  `10.5281/zenodo.22714586`.
 
 ## preprint-v1 — 2026-06-28
 

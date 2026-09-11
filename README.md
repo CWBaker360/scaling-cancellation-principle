@@ -3,7 +3,8 @@
 **Author:** C. Wayne Baker  
 **Original date:** June 28, 2026  
 **Revised:** September 11, 2026  
-**Status:** Revised preprint / source and reproducibility archive
+**Status:** Revised preprint / source and reproducibility archive<br>
+**Zenodo DOI:** https://doi.org/10.5281/zenodo.22714586
 
 > **A Scaling-Cancellation Principle for Chord-Based Geometric Approximations**
 
