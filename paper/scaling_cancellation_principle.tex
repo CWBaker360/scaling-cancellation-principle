@@ -3,709 +3,733 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
 \usepackage{booktabs}
 \usepackage{geometry}
 \usepackage[hidelinks]{hyperref}
 
 \geometry{margin=1in}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
-\newtheorem{corollary}{Corollary}
-\newtheorem{remark}{Remark}
-\newtheorem{assumption}{Assumption}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\wideQ}{\widehat{Q}}
+\newcommand{\sinc}{\operatorname{sinc}}
 
 \title{A Scaling--Cancellation Principle for Chord-Based Geometric Approximations}
-\author{C. Wayne Baker}
-\date{June 28, 2026}
+\author{C. Wayne Baker\\Independent Researcher\\Newfoundland and Labrador, Canada}
+\date{Revised September 11, 2026}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-This note separates two geometric error-suppression mechanisms that arise in
-chord-based approximation and angular refinement. The first is
-scaling--cancellation: when fixed-resolution approximants satisfy an
-even-power expansion
+This paper isolates a fixed-scale error-cancellation mechanism for geometric
+approximations whose discretization error admits an even-power asymptotic
+expansion.  If
 \[
 Q-Q_N
 =
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-C_6N^{-6}
-+
-\cdots,
+C_2N^{-2}+C_4N^{-4}+C_6N^{-6}+\cdots,
 \]
-Richardson-type linear combinations of \(Q_N,Q_{kN},\ldots\) cancel leading
-terms and increase the order of accuracy. This mechanism applies to
-polygonal approximations of \(\pi\), chordal perimeter approximations, and
-geometric N-series acceleration.
-
-The second mechanism is nonlinear residual-map iteration. In the Baker
-\(4{:}3\) trisection cascade, the active variable is not a resolution scale
-but the signed angular error, and the local map satisfies
+then sampling the same approximation family at scaled resolutions gives
+predictable factors $k^{-2j}$ on the successive error terms.  The two-scale
+combination
 \[
-e_{j+1}
+\wideQ_{N,k}
 =
--\frac{7}{384}e_j^3
-+
-O(e_j^5).
+\frac{k^2Q_{kN}-Q_N}{k^2-1}
 \]
-Thus the cascade multiplies error order under iteration, producing
+therefore cancels the $N^{-2}$ term and satisfies
 \[
-3
-\longrightarrow
-9
-\longrightarrow
-27
-\longrightarrow
-81
-\longrightarrow
-\cdots.
+Q-\wideQ_{N,k}
+=
+-\frac{C_4}{k^2}N^{-4}+O(N^{-6}).
 \]
-
-The contribution of the note is therefore taxonomic rather than a claim of
-new Richardson theory. Scaling--cancellation is an order-increasing
-fixed-resolution mechanism; the Baker \(4{:}3\) cascade is an
-order-multiplying nonlinear refinement. Both suppress leading error terms by
-geometrically selected coefficients or scalings, but they act in different
-variables and belong to different convergence classes.
+We then formulate the full multi-scale moment system, give its unique
+Lagrange weights, and derive an explicit leading-error coefficient.  For
+geometric scale nodes $N,bN,\ldots,b^sN$, cancellation of the first $s$
+even-power terms yields
+\[
+Q-\wideQ_N^{(s)}
+=
+(-1)^s C_{2s+2}\,b^{-s(s+1)}N^{-2s-2}
++O(N^{-2s-4}).
+\]
+An equivalent recursive scale ladder gives a geometric analogue of the
+Richardson--Romberg extrapolation table.  Applied to the half-perimeter of a
+regular inscribed polygon,
+$Q_N=N\sin(\pi/N)$, the tripling correction gives
+\[
+\pi-\frac{9Q_{3N}-Q_N}{8}
+=
+\frac{\pi^5}{1080}N^{-4}+O(N^{-6}).
+\]
+The framework also clarifies the distinction between fixed-resolution
+scaling--cancellation and nonlinear residual-map refinement.  In particular,
+the proportional-subtended angle-division residual
+\[
+\mathscr{R}_{a,b}(e)
+=
+-\frac{a^2-b^2}{24a^2}e^3+O(e^5)
+\]
+acts in the signed error variable and multiplies local error order under
+iteration; it is not an instance of the fixed-scale extrapolation theorem.
+No claim of new Richardson or Romberg theory is made.  The contribution is a
+geometric formulation, an explicit fixed-scale hierarchy, and a careful
+separation of the two convergence mechanisms.
 \end{abstract}
+
+\noindent\textbf{Keywords:}
+Richardson extrapolation; geometric approximation; chord approximation;
+polygonal approximation; error cancellation; N-series; asymptotic expansion.
 
 \section{Introduction}
 
-Chord-based geometric approximation appears throughout classical and modern
-geometry. Archimedes' polygonal approximation to \(\pi\), chordal perimeter
-approximations for ellipses, and perimeter approximations for smooth convex
-curves all involve a discretization parameter \(N\). As \(N\) grows, the
-approximation improves, and the leading error often has a predictable
-asymptotic structure.
-
-A recurring form is
-\[
+Many geometric quantities are approximated by replacing a smooth object with
+a finite chordal, polygonal, or sampled object.  A resolution parameter $N$
+then controls the approximation, and in favorable symmetric settings the
+error has an expansion in even powers of $N^{-1}$:
+\begin{equation}
+\label{eq:even-expansion-intro}
 Q-Q_N
 =
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-C_6N^{-6}
-+
-\cdots ,
-\]
-where \(Q\) is the target geometric quantity and \(Q_N\) is its
-\(N\)-resolution approximation. The even powers arise from symmetry: local
-odd-order errors cancel, leaving a hierarchy in powers of \(N^{-2}\).
+C_2N^{-2}+C_4N^{-4}+C_6N^{-6}+\cdots.
+\end{equation}
+The essential observation is elementary: replacing $N$ by $kN$ multiplies
+the term $N^{-2j}$ by $k^{-2j}$.  Once those scaling factors are known,
+linear combinations of several resolutions can annihilate selected terms of
+the expansion.
 
-The purpose of this paper is to isolate the elementary but useful
-consequence of this structure. If \(Q_N\) and \(Q_{kN}\) are available, then
-their leading errors differ by the factor \(k^{-2}\). Therefore a specific
-linear combination cancels the leading term. This is the geometric form of a
-Richardson-type acceleration mechanism.
+This is a geometric use of Richardson extrapolation, not a replacement for
+it.  The point of the present paper is to state the mechanism in a form that
+is directly reusable across a family of chord-based approximation problems
+and to separate it cleanly from a second mechanism that occurs in
+proportional-subtended angle refinement.
 
-The paper also clarifies what this mechanism is not. It is not a modular
-transformation, and it is not the same mechanism as the Baker \(4{:}3\)
-trisection cascade. The latter is a nonlinear residual-map iteration in the
-signed angular error. Its local law is cubic in the current error, not a
-fixed-resolution cancellation in \(N^{-2}\). The distinction is important:
-scaling--cancellation increases the order of a fixed asymptotic expansion,
-whereas the Baker cascade multiplies the local error order under iteration.
+The paper makes four concrete steps.
+\begin{enumerate}
+\item It proves the two-scale cancellation formula and records the surviving
+leading coefficient.
+\item It gives the unique multi-scale weights through a Lagrange interpolation
+formula in the scale variable $x=k^{-2}$.
+\item It specializes the construction to geometric nodes
+$N,bN,\ldots,b^sN$, obtaining the explicit factor $b^{-s(s+1)}$ in the
+first surviving term and an equivalent recursive scale ladder.
+\item It compares this fixed-resolution mechanism with a nonlinear cubic
+angle-residual law, where the active variable is the signed error itself
+rather than $N^{-2}$.
+\end{enumerate}
 
-\section{Even-Power Asymptotic Structure}
+The resulting framework is useful for polygonal approximations of $\pi$,
+for chordal perimeter approximations when the required expansion has been
+proved, and for the geometric N-series constructions developed in companion
+work.  The same algebra also appears in classical extrapolation methods; the
+present contribution is the geometric organization and the explicit
+separation of convergence classes.
 
-Let \(Q\) be a geometric quantity associated with a smooth curve, polygonal
-limit, or chord-based construction. Let \(Q_N\) be an approximation obtained
-from \(N\) uniform samples, chords, or subdivisions.
+\section{Asymptotic hypothesis and scope}
 
-The following assumption records the asymptotic structure used throughout
-the paper.
+The cancellation statements require an asymptotic expansion.  They do not
+assert that every chord-based approximation possesses one.
 
-\begin{assumption}[Even-power chord expansion]
-The approximation \(Q_N\) admits an asymptotic expansion of the form
-\[
+\begin{assumption}[Even-power expansion through order $2r+2$]
+\label{ass:even}
+For some integer $r\ge 1$, the approximation family $Q_N$ satisfies
+\begin{equation}
+\label{eq:general-expansion}
 Q-Q_N
 =
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-C_6N^{-6}
-+
-O(N^{-8}),
-\]
-where the constants \(C_{2j}\) depend on the underlying geometry but not on
-\(N\).
+\sum_{\ell=1}^{r+1} C_{2\ell}N^{-2\ell}
++O(N^{-2r-4})
+\qquad (N\to\infty),
+\end{equation}
+where the coefficients $C_{2\ell}$ are independent of $N$.
 \end{assumption}
 
-This assumption is natural for symmetric chord-based approximations. For
-example, if a smooth curve is sampled at uniform parameter spacing
-\(h=1/N\), then Taylor expansion of the local chord contribution produces
-powers of \(h\). Symmetry under reversal of the local interval cancels the
-odd-order contributions, leaving even powers of \(h\), equivalently even
-powers of \(N^{-1}\).
+In particular applications, an expansion of the form
+\eqref{eq:general-expansion} may follow from a Taylor expansion, a periodic
+quadrature argument, Euler--Maclaurin analysis, or a problem-specific exact
+factorization.  Local symmetry often helps produce even powers, but symmetry
+alone is not taken here as a universal theorem.
 
-\begin{remark}
-The paper does not require a universal proof that every chord-based
-approximation has such an expansion. The scaling--cancellation theorem is
-conditional on the displayed expansion. In applications, the expansion may
-be proved by Taylor expansion, Euler--Maclaurin analysis, or standard
-perimeter approximation estimates.
+\begin{remark}[Admissible scale factors]
+Because the index $N$ is typically integral, we use fixed integer scale
+factors $k\ge2$ in the basic theorem.  More generally, the same algebra works
+for any fixed scale factors for which all sampled resolutions are admissible.
 \end{remark}
 
-\section{The Scaling Law}
+\begin{remark}[Claim boundary]
+The results below are conditional extrapolation statements.  They do not
+supply the expansion \eqref{eq:general-expansion} for an arbitrary curve,
+mesh, parameterization, or chord rule.  Establishing that expansion remains
+an application-specific analytic task.
+\end{remark}
 
-The even-power expansion immediately gives a scaling law.
+\section{The two-scale scaling--cancellation principle}
 
-\begin{proposition}[Scaling of the leading errors]
-Assume
-\[
-Q-Q_N
-=
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-C_6N^{-6}
-+
-O(N^{-8}).
-\]
-For a fixed integer \(k\geq2\),
-\[
-Q-Q_{kN}
-=
-\frac{C_2}{k^2}N^{-2}
-+
-\frac{C_4}{k^4}N^{-4}
-+
-\frac{C_6}{k^6}N^{-6}
-+
-O(N^{-8}).
-\]
-\end{proposition}
+We begin with the elementary scaling law.
 
-\begin{proof}
-Substitute \(kN\) for \(N\) in the asymptotic expansion:
-\[
-Q-Q_{kN}
-=
-C_2(kN)^{-2}
-+
-C_4(kN)^{-4}
-+
-C_6(kN)^{-6}
-+
-O((kN)^{-8}).
-\]
-Since \(k\) is fixed, this becomes
-\[
-Q-Q_{kN}
-=
-\frac{C_2}{k^2}N^{-2}
-+
-\frac{C_4}{k^4}N^{-4}
-+
-\frac{C_6}{k^6}N^{-6}
-+
-O(N^{-8}).
-\]
-\end{proof}
-
-Thus the leading error coefficient is transformed by the predictable factor
-\(k^{-2}\). This is the source of the cancellation formula.
-
-\section{The Scaling--Cancellation Principle}
-
-\begin{theorem}[Scaling--cancellation principle]
+\begin{proposition}[Scaling of the asymptotic coefficients]
+\label{prop:scaling}
 Suppose
 \[
 Q-Q_N
 =
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-O(N^{-6}).
+C_2N^{-2}+C_4N^{-4}+C_6N^{-6}+O(N^{-8}).
 \]
-For fixed \(k\geq2\), define
+For a fixed integer $k\ge2$,
 \[
-\widehat Q_{N,k}
+Q-Q_{kN}
 =
-Q_{kN}
+\frac{C_2}{k^2}N^{-2}
 +
-\frac{Q_{kN}-Q_N}{k^2-1}.
+\frac{C_4}{k^4}N^{-4}
++
+\frac{C_6}{k^6}N^{-6}
++O(N^{-8}).
 \]
-Equivalently,
-\[
-\widehat Q_{N,k}
+\end{proposition}
+
+\begin{proof}
+Substitute $kN$ for $N$ in the assumed expansion and use the fact that $k$
+is fixed.
+\end{proof}
+
+\begin{theorem}[Two-scale scaling--cancellation]
+\label{thm:two-scale}
+Suppose
+\begin{equation}
+\label{eq:two-scale-assumption}
+Q-Q_N
+=
+C_2N^{-2}+C_4N^{-4}+O(N^{-6}).
+\end{equation}
+For fixed $k\ge2$, define
+\begin{equation}
+\label{eq:two-scale-def}
+\wideQ_{N,k}
+=
+Q_{kN}+\frac{Q_{kN}-Q_N}{k^2-1}
 =
 \frac{k^2Q_{kN}-Q_N}{k^2-1}.
-\]
+\end{equation}
 Then
-\[
-Q-\widehat Q_{N,k}
+\begin{equation}
+\label{eq:two-scale-error}
+Q-\wideQ_{N,k}
 =
-O(N^{-4}).
-\]
-More precisely,
-\[
-Q-\widehat Q_{N,k}
-=
--\frac{C_4}{k^2}N^{-4}
-+
-O(N^{-6}).
-\]
+-\frac{C_4}{k^2}N^{-4}+O(N^{-6}).
+\end{equation}
+In particular, the order improves from $O(N^{-2})$ to $O(N^{-4})$.
 \end{theorem}
 
 \begin{proof}
-From the expansion,
+From \eqref{eq:two-scale-assumption},
 \[
 Q_N
 =
-Q
--
-C_2N^{-2}
--
-C_4N^{-4}
-+
-O(N^{-6}),
+Q-C_2N^{-2}-C_4N^{-4}+O(N^{-6})
 \]
 and
 \[
 Q_{kN}
 =
-Q
--
-\frac{C_2}{k^2}N^{-2}
--
-\frac{C_4}{k^4}N^{-4}
-+
-O(N^{-6}).
+Q-\frac{C_2}{k^2}N^{-2}
+-\frac{C_4}{k^4}N^{-4}+O(N^{-6}).
 \]
-Using
+Substituting these expressions into \eqref{eq:two-scale-def} gives
 \[
-\widehat Q_{N,k}
+\wideQ_{N,k}-Q
 =
-\frac{k^2Q_{kN}-Q_N}{k^2-1},
+\frac{C_4}{k^2}N^{-4}+O(N^{-6}),
 \]
-we compute
-\[
-\widehat Q_{N,k}-Q
-=
-\frac{
-k^2(Q_{kN}-Q)-(Q_N-Q)
-}{
-k^2-1
-}.
-\]
-Now
-\[
-k^2(Q_{kN}-Q)
-=
--C_2N^{-2}
--
-\frac{C_4}{k^2}N^{-4}
-+
-O(N^{-6}),
-\]
-while
-\[
-Q_N-Q
-=
--C_2N^{-2}
--
-C_4N^{-4}
-+
-O(N^{-6}).
-\]
-Subtracting gives
-\[
-k^2(Q_{kN}-Q)-(Q_N-Q)
-=
-C_4\left(1-\frac{1}{k^2}\right)N^{-4}
-+
-O(N^{-6}).
-\]
-Dividing by \(k^2-1\),
-\[
-\widehat Q_{N,k}-Q
-=
-\frac{C_4}{k^2}N^{-4}
-+
-O(N^{-6}).
-\]
-Therefore
-\[
-Q-\widehat Q_{N,k}
-=
--\frac{C_4}{k^2}N^{-4}
-+
-O(N^{-6}),
-\]
-as claimed.
+which is equivalent to \eqref{eq:two-scale-error}.
 \end{proof}
 
-\begin{remark}
-The combination
-\[
-\widehat Q_{N,k}
+\begin{corollary}[Tripling]
+\label{cor:tripling}
+For $k=3$,
+\begin{equation}
+\label{eq:tripling}
+\wideQ_{N,3}
 =
-Q_{kN}
-+
-\frac{Q_{kN}-Q_N}{k^2-1}
-\]
-uses only the two approximations \(Q_N\) and \(Q_{kN}\). It does not require
-knowledge of \(C_2\). The coefficient \(C_2\) is eliminated because its
-scaling factor \(k^{-2}\) is known.
-\end{remark}
-
-\section{Higher-Order Fixed-Scale Cancellation}
-
-The same idea extends to more than two scales. Suppose the full even-power
-expansion has the form
-\[
-Q-Q_N
-=
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-C_6N^{-6}
-+
-\cdots .
-\]
-
-Choose distinct fixed scale factors
-\[
-k_0,k_1,\ldots,k_s,
+\frac{9Q_{3N}-Q_N}{8},
 \qquad
-k_j>0,
-\]
-and form a linear combination
-\[
-\widehat Q_N^{(s)}
+Q-\wideQ_{N,3}
 =
-\sum_{j=0}^{s}w_jQ_{k_jN}.
-\]
+-\frac{C_4}{9}N^{-4}+O(N^{-6}).
+\end{equation}
+\end{corollary}
 
-To preserve the limiting value \(Q\), the weights must satisfy
-\[
-\sum_{j=0}^{s}w_j=1.
-\]
-To cancel the first \(s\) even-power error terms, require
-\[
-\sum_{j=0}^{s}w_jk_j^{-2\ell}=0,
-\qquad
-\ell=1,2,\ldots,s.
-\]
+The important point is that $C_2$ need not be known.  Its value disappears
+because its scale factor $k^{-2}$ is known.
 
-\begin{theorem}[Higher-order fixed-scale cancellation]
+\section{Multi-scale cancellation as interpolation in the scale variable}
+
+The two-scale formula extends naturally to several resolutions.  Let
+\[
+k_0=1,\qquad k_1,\ldots,k_s>0
+\]
+be distinct admissible scale factors and define
+\[
+x_j=k_j^{-2}.
+\]
+The asymptotic error at resolution $k_jN$ is a power series in $x_j$:
+\[
+Q-Q_{k_jN}
+=
+\sum_{\ell\ge1}C_{2\ell}x_j^{\ell}N^{-2\ell}.
+\]
+Thus cancellation of successive even powers is exactly a polynomial
+interpolation condition at $x=0$.
+
+\begin{theorem}[Unique $s$-term cancellation weights]
+\label{thm:multiscale}
 Assume
-\[
+\begin{equation}
+\label{eq:multi-expansion}
 Q-Q_N
 =
 \sum_{\ell=1}^{s+1}C_{2\ell}N^{-2\ell}
-+
-O(N^{-2s-4}).
-\]
-Let
-\[
-k_0=1,
-\qquad
-k_1,\ldots,k_s
-\]
-be distinct positive scale factors, and define
-\[
-\widehat Q_N^{(s)}
++O(N^{-2s-4}).
+\end{equation}
+Let $k_0,\ldots,k_s$ be distinct positive admissible scale factors and set
+$x_j=k_j^{-2}$.  Define
+\begin{equation}
+\label{eq:weights}
+w_j
+=
+\prod_{\substack{m=0\\m\ne j}}^{s}
+\frac{x_m}{x_m-x_j},
+\qquad j=0,\ldots,s,
+\end{equation}
+and
+\begin{equation}
+\label{eq:multi-estimator}
+\wideQ_N^{(s)}
 =
 \sum_{j=0}^{s}w_jQ_{k_jN}.
-\]
-Suppose the weights satisfy
-\[
-\sum_{j=0}^{s}w_j=1
-\]
-and
-\[
-\sum_{j=0}^{s}w_jk_j^{-2\ell}=0,
-\qquad
-\ell=1,2,\ldots,s.
-\]
+\end{equation}
 Then
-\[
-Q-\widehat Q_N^{(s)}
+\begin{align}
+\sum_{j=0}^{s}w_j&=1,\label{eq:mom0}\\
+\sum_{j=0}^{s}w_jk_j^{-2\ell}&=0,
+\qquad \ell=1,\ldots,s,\label{eq:moments}
+\end{align}
+and these conditions determine the weights uniquely.  Moreover,
+\begin{equation}
+\label{eq:leading-multiscale}
+Q-\wideQ_N^{(s)}
 =
-O(N^{-2s-2}).
-\]
-
-For distinct values
-\[
-k_0^{-2},k_1^{-2},\ldots,k_s^{-2},
-\]
-these conditions form a nonsingular Vandermonde system. Hence the weights
-exist and are unique.
+(-1)^s C_{2s+2}
+\left(\prod_{j=0}^{s}k_j^{-2}\right)
+N^{-2s-2}
++O(N^{-2s-4}).
+\end{equation}
 \end{theorem}
 
-\section{Application to Polygonal Approximation of \texorpdfstring{\(\pi\)}{pi}}
+\begin{proof}
+The numbers $w_j$ in \eqref{eq:weights} are the Lagrange interpolation
+weights for evaluating at $x=0$ from the distinct nodes
+$x_0,\ldots,x_s$.  Therefore they reproduce constants and annihilate the
+monomials $x,x^2,\ldots,x^s$, which proves
+\eqref{eq:mom0}--\eqref{eq:moments}.  The associated Vandermonde system is
+nonsingular, so the weights are unique.
 
-For an inscribed regular \(N\)-gon in the unit circle, the perimeter is
+Using \eqref{eq:multi-expansion} at each scale and
+\eqref{eq:mom0}--\eqref{eq:moments}, all terms through $N^{-2s}$ cancel.
+The first surviving coefficient is
 \[
-P_N
-=
-2N\sin\left(\frac{\pi}{N}\right).
+C_{2s+2}N^{-2s-2}
+\sum_{j=0}^{s}w_jx_j^{s+1}.
 \]
-Using the sine expansion,
+For $f(x)=x^{s+1}$, the interpolation error identity at $x=0$ gives
 \[
-\sin x
+0-\sum_{j=0}^{s}w_jx_j^{s+1}
 =
-x-\frac{x^3}{6}+\frac{x^5}{120}+O(x^7),
+\prod_{j=0}^{s}(0-x_j)
+=
+(-1)^{s+1}\prod_{j=0}^{s}x_j.
 \]
-we obtain
+Hence
 \[
-P_N
+\sum_{j=0}^{s}w_jx_j^{s+1}
 =
-2N
-\left[
-\frac{\pi}{N}
--
-\frac{\pi^3}{6N^3}
-+
-\frac{\pi^5}{120N^5}
-+
-O(N^{-7})
-\right].
+(-1)^s\prod_{j=0}^{s}x_j,
 \]
-Therefore
-\[
-P_N
-=
-2\pi
--
-\frac{\pi^3}{3}N^{-2}
-+
-\frac{\pi^5}{60}N^{-4}
-+
-O(N^{-6}).
-\]
-Thus
-\[
-2\pi-P_N
-=
-\frac{\pi^3}{3}N^{-2}
--
-\frac{\pi^5}{60}N^{-4}
-+
-O(N^{-6}).
-\]
-
-Applying the scaling--cancellation theorem gives
-\[
-\widehat P_{N,k}
-=
-P_{kN}
-+
-\frac{P_{kN}-P_N}{k^2-1},
-\]
-with
-\[
-2\pi-\widehat P_{N,k}
-=
-O(N^{-4}).
-\]
-
-For \(k=3\),
-\[
-\widehat P_{N,3}
-=
-P_{3N}
-+
-\frac{P_{3N}-P_N}{8}.
-\]
+which proves \eqref{eq:leading-multiscale}.
+\end{proof}
 
 \begin{remark}
-This construction does not prove a new value of \(\pi\). It accelerates a
-known convergent polygonal approximation by cancelling its leading
-asymptotic error term.
+The theorem is a Richardson extrapolation statement written in a geometric
+scale variable.  The explicit product in \eqref{eq:leading-multiscale} is
+useful because it makes the surviving coefficient transparent once the scale
+nodes are fixed.
 \end{remark}
 
-\section{Application to Smooth Convex-Curve Perimeters}
+\section{Geometric scale nodes and the N-series hierarchy}
 
-Let \(\Gamma\) be a smooth closed convex curve with perimeter \(P\), and let
-\(P_N\) be a chordal perimeter approximation using \(N\) equal-parameter
-samples. Under standard smoothness and symmetry assumptions, one obtains an
-even-power expansion
+A particularly natural choice in geometric refinement is a fixed base
+$b\ge2$ with
+\begin{equation}
+\label{eq:geometric-nodes}
+k_j=b^j,
+\qquad
+j=0,1,\ldots,s.
+\end{equation}
+These are the resolutions
 \[
-P-P_N
+N,\ bN,\ b^2N,\ldots,b^sN.
+\]
+In the geometric N-series terminology used in companion work, these are the
+successive scale samples.
+
+\begin{corollary}[Geometric-node leading coefficient]
+\label{cor:geometric-nodes}
+Under the hypotheses of Theorem~\ref{thm:multiscale}, choose
+$k_j=b^j$.  Then
+\begin{equation}
+\label{eq:geometric-leading}
+Q-\wideQ_N^{(s)}
 =
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-O(N^{-6}).
-\]
+(-1)^s C_{2s+2}\,b^{-s(s+1)}N^{-2s-2}
++O(N^{-2s-4}).
+\end{equation}
+\end{corollary}
 
-The scaling--cancellation theorem gives
+\begin{proof}
+Since
 \[
-\widehat P_{N,k}
+\prod_{j=0}^{s}k_j^{-2}
 =
-P_{kN}
-+
-\frac{P_{kN}-P_N}{k^2-1},
-\]
-and therefore
-\[
-P-\widehat P_{N,k}
+\prod_{j=0}^{s}b^{-2j}
 =
-O(N^{-4}).
-\]
-
-For \(k=3\),
-\[
-\widehat P_{N,3}
+b^{-2\sum_{j=0}^{s}j}
 =
-P_{3N}
-+
-\frac{P_{3N}-P_N}{8}.
+b^{-s(s+1)},
 \]
+the result follows from \eqref{eq:leading-multiscale}.
+\end{proof}
 
-This is the same structural mechanism used in chordal ellipse-perimeter
-corrections. The method does not depend on the ellipse specifically; the
-ellipse is a particularly important example because its exact perimeter is
-non-elementary and classical approximations such as Ramanujan's formula act
-on a different variable, namely eccentricity.
+The same hierarchy can be generated recursively, without solving the full
+Vandermonde system at every order.
 
-\section{Comparison with the Baker \texorpdfstring{\(4{:}3\)}{4:3} Trisection Cascade}
-
-The preceding applications are fixed-resolution approximations. Their
-active asymptotic variable is \(N^{-2}\), and the improvement is obtained
-by combining approximants at \(N\), \(kN\), and possibly further fixed
-scales.
-
-The Baker \(4{:}3\) trisection cascade belongs to a different class. There
-the active variable is not a discretization scale but the signed angular
-error
-\[
-e_j
+\begin{theorem}[Recursive fixed-base cancellation ladder]
+\label{thm:recursive}
+Let $Q_N^{[0]}=Q_N$.  For a fixed integer $b\ge2$, define recursively
+\begin{equation}
+\label{eq:recursive}
+Q_N^{[r]}
 =
-D_j-\frac{\theta}{3}.
-\]
-For the Baker \(4{:}3\) branch, the local residual map has the form
-\[
-e_{j+1}
-=
--\frac{7}{384}e_j^3
-+
-O(e_j^5).
-\]
-After normalization, this becomes the degree-three normal form
-\[
-\eta_{j+1}
-=
--\eta_j^3
-+
-O(\eta_j^5).
-\]
-
-Thus the trisection cascade is not a direct instance of the
-scaling--cancellation theorem. It is a nonlinear residual-map iteration
-whose local effect is to multiply the current error order by three:
-\[
-3
-\longrightarrow
-9
-\longrightarrow
-27
-\longrightarrow
-81
-\longrightarrow
-\cdots .
-\]
-
-The comparison is nevertheless useful. In both settings, geometry supplies
-a distinguished coefficient, scaling, or correction that suppresses a
-leading error contribution. But the mechanisms are logically distinct:
-
-\begin{itemize}
-\item scaling--cancellation is order-increasing cancellation in a
-fixed-resolution parameter;
-\item the Baker \(4{:}3\) cascade is order-multiplying nonlinear iteration in
-the signed error variable.
-\end{itemize}
-
-This distinction prevents the fixed N-series mechanism from being mistaken
-for a modular transformation or for the Baker cubic residual cascade.
-
-\section{Discussion}
-
-The scaling--cancellation mechanism has three ingredients:
-
-\begin{itemize}
-\item symmetry produces an even-power expansion;
-\item scaling gives predictable transformations of the asymptotic terms;
-\item linear combination cancels the leading error contribution.
-\end{itemize}
-
-This produces systematic order improvement without nonlinear iteration. In
-the simplest case, a pair of approximants \(Q_N\) and \(Q_{kN}\) cancels the
-leading \(N^{-2}\) term and produces fourth-order accuracy. With more fixed
-scales, successive even-power terms may be cancelled.
-
-The mechanism is therefore best described as a Richardson-type geometric
-acceleration. It should be distinguished from super-exponential modular
-iteration, such as the arithmetic--geometric mean, and from nonlinear
-geometric residual cascades, such as the Baker \(4{:}3\) trisection
-construction.
-
-\section{Conclusion}
-
-We have formulated a scaling--cancellation principle governing chord-based
-geometric approximations with even-power asymptotic expansions. If
+\frac{b^{2r}Q_{bN}^{[r-1]}-Q_N^{[r-1]}}
+{b^{2r}-1},
+\qquad r\ge1.
+\end{equation}
+If
 \[
 Q-Q_N
 =
-C_2N^{-2}
-+
-C_4N^{-4}
-+
-O(N^{-6}),
+\sum_{\ell=1}^{r+1}C_{2\ell}N^{-2\ell}
++O(N^{-2r-4}),
 \]
 then
 \[
-\widehat Q_{N,k}
+Q-Q_N^{[r]}
 =
-Q_{kN}
-+
-\frac{Q_{kN}-Q_N}{k^2-1}
+O(N^{-2r-2}).
 \]
-satisfies
+The value $Q_N^{[r]}$ is a linear combination of the $r+1$ geometric-scale
+samples
 \[
-Q-\widehat Q_{N,k}
+Q_N,Q_{bN},\ldots,Q_{b^rN}
+\]
+and agrees with the unique estimator of
+Corollary~\ref{cor:geometric-nodes}.
+\end{theorem}
+
+\begin{proof}
+Assume inductively that
+\[
+Q-Q_N^{[r-1]}
 =
-O(N^{-4}).
+D_{2r}N^{-2r}+O(N^{-2r-2}).
+\]
+Then
+\[
+Q-Q_{bN}^{[r-1]}
+=
+D_{2r}b^{-2r}N^{-2r}+O(N^{-2r-2}).
+\]
+Substitution into \eqref{eq:recursive} cancels the $N^{-2r}$ term, leaving
+$O(N^{-2r-2})$.  The recursion uses exactly the nodes
+$N,bN,\ldots,b^rN$ and satisfies the same moment conditions as the unique
+Lagrange estimator, so the two forms agree.
+\end{proof}
+
+\section{Regular polygon approximation of \texorpdfstring{$\pi$}{pi}}
+
+For the unit circle, let
+\begin{equation}
+\label{eq:polygon-pi}
+P_N
+=
+N\sin\!\left(\frac{\pi}{N}\right).
+\end{equation}
+This is half the perimeter of the regular inscribed $N$-gon, so
+$P_N\to\pi$.  The sine expansion gives
+\begin{equation}
+\label{eq:pi-expansion}
+\pi-P_N
+=
+\frac{\pi^3}{6}N^{-2}
+-
+\frac{\pi^5}{120}N^{-4}
++
+\frac{\pi^7}{5040}N^{-6}
+-
+\frac{\pi^9}{362880}N^{-8}
++O(N^{-10}).
+\end{equation}
+
+Applying Corollary~\ref{cor:tripling} gives the one-step tripling estimator
+\begin{equation}
+\label{eq:pi-tripling}
+\widehat P_N^{[1]}
+=
+\frac{9P_{3N}-P_N}{8}
+\end{equation}
+and the explicit error law
+\begin{equation}
+\label{eq:pi-tripling-error}
+\pi-\widehat P_N^{[1]}
+=
+\frac{\pi^5}{1080}N^{-4}
++O(N^{-6}).
+\end{equation}
+Thus the raw $N^{-2}$ polygon error is converted into an $N^{-4}$ error
+without using the value of the leading coefficient $\pi^3/6$ in the
+extrapolation formula itself.
+
+At the next level, the three tripling nodes $N,3N,9N$ give
+\begin{equation}
+\label{eq:pi-tripling-second}
+\widehat P_N^{[2]}
+=
+\frac{P_N-90P_{3N}+729P_{9N}}{640}.
+\end{equation}
+By Corollary~\ref{cor:geometric-nodes},
+\begin{equation}
+\label{eq:pi-tripling-second-error}
+\pi-\widehat P_N^{[2]}
+=
+\frac{\pi^7}{3674160}N^{-6}
++O(N^{-8}).
+\end{equation}
+Equations \eqref{eq:pi-tripling-error} and
+\eqref{eq:pi-tripling-second-error} are examples of the general
+$2,4,6,\ldots$ order ladder.
+
+\begin{remark}
+These formulas do not define a new value of $\pi$.  They accelerate a known
+convergent polygonal approximation by cancelling known asymptotic modes.
+\end{remark}
+
+\section{Ellipse and smooth-curve applications}
+
+The abstract theorem applies to any chordal perimeter family after an
+expansion of the required form has been established for that family.  One
+important companion example is the equal-parameter inscribed polygon of a
+nondegenerate ellipse.  In that setting, the companion ellipse analysis gives
+an exact factorization of the form
+\begin{equation}
+\label{eq:ellipse-factorization}
+P_N
+=
+\sinc\!\left(\frac{\pi}{N}\right)M_N,
+\qquad
+\sinc x=\frac{\sin x}{x},
+\end{equation}
+where $M_N$ is a periodic midpoint approximation to the ellipse speed.  For a
+fixed nondegenerate ellipse, the midpoint remainder is exponentially small,
+so the algebraic part of the polygon error is governed by the sinc series.
+Consequently,
+\begin{equation}
+\label{eq:ellipse-expansion}
+\frac{P-P_N}{P}
+=
+\frac{\pi^2}{6N^2}
+-
+\frac{\pi^4}{120N^4}
++
+O(N^{-6})+O(e^{-\rho N})
+\end{equation}
+for any admissible strip parameter $\rho>0$ below the analytic width.
+The tripling correction therefore gives
+\begin{equation}
+\label{eq:ellipse-tripling}
+P-\frac{9P_{3N}-P_N}{8}
+=
+\frac{P\pi^4}{1080}N^{-4}
++O(N^{-6})+O(e^{-\rho N}).
+\end{equation}
+
+For a more general smooth closed curve, one should not assume
+\eqref{eq:ellipse-expansion}.  Instead, if a particular sampling and chord
+rule is proved to satisfy
+\[
+P-P_N
+=
+C_2N^{-2}+C_4N^{-4}+O(N^{-6}),
+\]
+then Theorem~\ref{thm:two-scale} applies immediately.  This conditional
+formulation keeps the extrapolation theorem separate from the analytic work
+needed to justify the expansion in each geometry.
+
+\section{A distinct mechanism: nonlinear cubic residual refinement}
+
+The fixed-scale cancellation above acts in the resolution variable
+$N^{-2}$.  A different error-suppression mechanism appears in the
+proportional-subtended angle-division construction.
+
+For positive integers $a$ and $b$, define the local transfer map
+\[
+\Phi_{a,b}(x)
+=
+2\arcsin\!\left(\frac{a}{b}\sin\frac{x}{2}\right).
+\]
+If $e$ is a signed angular error, the distinguished residual correction is
+\begin{equation}
+\label{eq:cubic-residual}
+\mathscr{R}_{a,b}(e)
+=
+e-\Phi_{a,b}\!\left(\frac{b}{a}e\right).
+\end{equation}
+Its local expansion is
+\begin{equation}
+\label{eq:cubic-law}
+\mathscr{R}_{a,b}(e)
+=
+-\frac{a^2-b^2}{24a^2}e^3+O(e^5),
+\qquad a\ne b.
+\end{equation}
+For the motivating $4{:}3$ branch,
+\begin{equation}
+\label{eq:four-three}
+\mathscr{R}_{4,3}(e)
+=
+-\frac{7}{384}e^3+O(e^5).
+\end{equation}
+
+The distinction from scaling--cancellation is structural.  If
+$e=O(\varepsilon^p)$ and the cubic coefficient in
+\eqref{eq:cubic-law} is nonzero, then
+\[
+\mathscr{R}_{a,b}(e)=O(\varepsilon^{3p}).
+\]
+Thus repeated residual correction multiplies the local error order by three:
+\[
+3\longrightarrow9\longrightarrow27\longrightarrow81\longrightarrow\cdots.
+\]
+By contrast, the fixed-scale hierarchy cancels successive asymptotic powers
+of $N^{-2}$:
+\[
+2\longrightarrow4\longrightarrow6\longrightarrow8\longrightarrow\cdots.
 \]
 
-The framework applies directly to polygonal approximations of \(\pi\),
-chordal perimeter approximations for ellipses, and smooth convex-curve
-perimeter approximations. It also clarifies the relationship between
-geometric N-series acceleration and other refinement mechanisms.
+\begin{table}[ht]
+\centering
+\caption{Two distinct geometric error-suppression mechanisms.}
+\label{tab:comparison}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Feature & Scaling--cancellation & Cubic residual refinement \\
+\midrule
+Active variable & $N^{-2}$ & signed error $e$ \\
+Operation & linear combination of scales & nonlinear residual map \\
+Local law & cancel selected powers & $e\mapsto ce^3+O(e^5)$ \\
+Order behavior & $2,4,6,8,\ldots$ & $3,9,27,81,\ldots$ \\
+Classical analogue & Richardson--Romberg & nonlinear local iteration \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The Baker \(4{:}3\) trisection cascade is not a scaling--cancellation
-operator. It is a separate cubic residual-map cascade. Together, these
-examples show two complementary forms of geometric error suppression:
-order-increasing cancellation in a resolution variable and order-multiplying
-iteration in an error variable.
+The two mechanisms can coexist within a broader geometric approximation
+program, but neither should be identified with the other.
 
-Future work will extend the fixed-resolution scaling--cancellation framework
-to higher-order combinations, nonuniform chord distributions, and broader
-classes of smooth curves.
+\section{Classical extrapolation and claim boundary}
+
+The algebra of Sections 3--5 belongs to the classical extrapolation family.
+Richardson's work established the general principle of using asymptotic error
+structure to improve approximations, and Romberg later organized repeated
+extrapolation on geometrically refined quadrature meshes.  The recursion
+\eqref{eq:recursive} is therefore not claimed as a new numerical-analysis
+principle.
+
+What is specific here is the geometric packaging:
+\begin{itemize}
+\item the resolution variable is attached directly to chordal and polygonal
+geometric approximants;
+\item the scale variable $x=k^{-2}$ makes the moment structure explicit;
+\item geometric nodes yield the closed surviving factor
+$b^{-s(s+1)}$;
+\item the framework is placed beside, and explicitly separated from, the
+nonlinear proportional-subtended cubic residual cascade.
+\end{itemize}
+
+Likewise, the phrase \emph{geometric N-series} is used here as terminology for
+the author's scale-indexed geometric approximation framework.  It is not a
+claim that the finite extrapolation formulas are outside classical
+Richardson-type theory, nor is the fixed-scale mechanism identified with
+Landen or modular transformations.
+
+\section{Conclusion}
+
+An even-power geometric error expansion provides a simple scale algebra.  If
+\[
+Q-Q_N
+=
+C_2N^{-2}+C_4N^{-4}+\cdots,
+\]
+then the samples $Q_{kN}$ carry the same coefficients multiplied by the known
+factors $k^{-2j}$.  The two-scale estimator
+\[
+\wideQ_{N,k}
+=
+\frac{k^2Q_{kN}-Q_N}{k^2-1}
+\]
+cancels the leading term.  With $s+1$ distinct scales, Lagrange weights in
+$x=k^{-2}$ cancel the first $s$ terms, and geometric scale nodes
+$N,bN,\ldots,b^sN$ yield
+\[
+Q-\wideQ_N^{(s)}
+=
+(-1)^sC_{2s+2}b^{-s(s+1)}N^{-2s-2}
++O(N^{-2s-4}).
+\]
+
+For the regular polygon half-perimeter this gives a direct hierarchy of
+accelerated approximations to $\pi$; for ellipse and other chordal perimeter
+problems it applies once the needed expansion has been established.  The same
+framework also provides a clean taxonomic boundary: fixed-resolution
+Richardson-type cancellation raises the order along an even-power ladder,
+whereas proportional-subtended residual refinement acts nonlinearly on the
+signed error and multiplies its local order.
+
+Future work may study stability of the multi-scale weights, optimal scale
+selection under finite precision or geometric construction cost, and
+extensions to curved-surface approximation families for which an even-power
+expansion can be proved.
 
 \begin{thebibliography}{9}
-
-\bibitem{Archimedes}
-Archimedes,
-\emph{Measurement of a Circle}.
 
 \bibitem{Richardson1911}
 L.~F. Richardson,
@@ -713,29 +737,33 @@ L.~F. Richardson,
 problems involving differential equations, with an application to the
 stresses in a masonry dam,''
 \emph{Philosophical Transactions of the Royal Society of London, Series A},
-210, 1911, pp.~307--357.
+210 (1911), 307--357.
 
-\bibitem{TrefethenWeideman2014}
-L.~N. Trefethen and J.~A.~C. Weideman,
-``The exponentially convergent trapezoidal rule,''
-\emph{SIAM Review},
-56(3), 2014, pp.~385--458.
+\bibitem{Romberg1955}
+W.~Romberg,
+``Vereinfachte numerische Integration,''
+\emph{Norske Vid. Selsk. Forh., Trondheim},
+28 (1955), 30--36.
+
+\bibitem{BakerNSeries2026}
+C.~W. Baker,
+\emph{A Constructive N-Series Acceleration Law for Polygonal Approximation of Pi},
+research manuscript and reproducibility archive, 2026.
+
+\bibitem{BakerScaleOptimized2026}
+C.~W. Baker,
+\emph{Scale-Optimized Geometric Acceleration of Polygonal Approximations to Pi},
+research manuscript and reproducibility archive, 2026.
 
 \bibitem{BakerEllipseScaling2026}
-W.~Baker,
+C.~W. Baker,
 \emph{A Universal Scaling Law for Ellipse Perimeters},
-manuscript, 2026.
+research manuscript and reproducibility archive, 2026.
 
-\bibitem{BakerCascade2026}
-W.~Baker,
-\emph{A Constructive Cubic Error Cascade for Approximate Angle Trisection},
-manuscript, 2026.
-
-\bibitem{BakerRamanujanLanden2026}
-W.~Baker,
-\emph{Ramanujan, Landen, and Baker N-Series Refinement:
-Higher-Degree Modular Gap Laws and a Two-Axis Comparison},
-manuscript, 2026.
+\bibitem{BakerCubicRefinement2026}
+C.~W. Baker,
+\emph{A Local Cubic Refinement Law for Proportional-Subtended Angle Division},
+research manuscript and reproducibility archive, 2026.
 
 \end{thebibliography}
 
