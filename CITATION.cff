@@ -9,7 +9,7 @@ date-released: 2026-09-11
 version: preprint-v2
 repository-code: "https://github.com/CWBaker360/scaling-cancellation-principle"
 url: "https://github.com/CWBaker360/scaling-cancellation-principle"
-  abstract: >-
+abstract: >-
   This paper develops a Richardson-type scaling-cancellation framework for
   chord-based geometric approximations with even-power asymptotic expansions.
   It proves the two-scale cancellation theorem, derives the unique multi-scale
